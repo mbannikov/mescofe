@@ -1,2 +1,2 @@
 # mescofe
-mescofe — message communication framework
+mescofe — **ME**ssage **CO**mmunication **F**ram**E**work
