@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: spring-boot-starter-tests
+
+logging:
+  level:
+    ru.mbannikov.mescofe: DEBUG

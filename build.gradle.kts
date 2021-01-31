@@ -1,5 +1,5 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformJvmPlugin
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val kotlinVersion by extra { "1.4.20" }
 
@@ -14,16 +14,15 @@ allprojects {
 }
 
 subprojects {
-    group = "ru.mbannikov"
+    group = "ru.mbannikov.mescofe"
     version = "1.0.0"
 
     apply<KotlinPlatformJvmPlugin>()
+    apply(plugin = "org.gradle.maven")
 
     dependencies {
         api(kotlin("stdlib-jdk8", kotlinVersion))
-
-        testImplementation(kotlin("test-junit5"))
-        testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", "5.5.2")
+        api("io.github.microutils:kotlin-logging:1.12.0")
     }
 
     tasks.withType<Test> {
