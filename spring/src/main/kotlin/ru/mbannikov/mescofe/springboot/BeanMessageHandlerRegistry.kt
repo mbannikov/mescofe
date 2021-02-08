@@ -17,9 +17,9 @@ class BeanMessageHandlerRegistry(
         messageHandlerBeans.map { bean ->
             val classMethods: Iterable<Method> = ReflectionUtils.methodsOf(clazz = bean::class.java)
             classMethods.mapNotNull { method ->
-                val hasHandler: Boolean = AnnotationUtils.findAnnotation(method, MessageHandler::class.java) != null
-                if (hasHandler)
-                    MethodMessageHandler(target = bean, method = method)
+                val messageHandler = AnnotationUtils.findAnnotation(method, MessageHandler::class.java)
+                if (messageHandler != null)
+                    MethodMessageHandler(target = bean, method = method, messageType = messageHandler.messageType)
                 else
                     null
             }

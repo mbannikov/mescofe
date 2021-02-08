@@ -10,12 +10,10 @@ import ru.mbannikov.mescofe.eventhandling.EventBus
 import ru.mbannikov.mescofe.eventhandling.EventGateway
 import ru.mbannikov.mescofe.messaging.MessageDispatcher
 import ru.mbannikov.mescofe.messaging.MessageHandlerRegistry
+import ru.mbannikov.mescofe.springboot.eventhandling.AmqpEventBus
 
 @Configuration
 class MessagingAutoConfiguration {
-
-    @Bean
-    fun messageHandlerRegistryBeanDefinitionRegistryPostProcessor() = MessageHandlerRegistryBeanDefinitionRegistryPostProcessor()
 
     @Bean
     @ConditionalOnMissingBean
@@ -29,7 +27,12 @@ class MessagingAutoConfiguration {
     fun eventGateway(eventBus: EventBus): EventGateway = EventGateway(eventBus)
 
     @Bean
-    @ConditionalOnMissingBean
     fun eventDispatcher(eventBus: EventBus, handlerRegistry: MessageHandlerRegistry) = MessageDispatcher(eventBus, handlerRegistry)
+
+    companion object {
+        @Bean
+        fun messageHandlerRegistryBeanDefinitionRegistryPostProcessor() =
+            MessageHandlerRegistryBeanDefinitionRegistryPostProcessor()
+    }
 }
 

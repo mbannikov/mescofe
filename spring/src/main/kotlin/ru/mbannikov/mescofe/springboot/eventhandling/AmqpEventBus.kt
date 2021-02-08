@@ -1,4 +1,4 @@
-package ru.mbannikov.mescofe.springboot
+package ru.mbannikov.mescofe.springboot.eventhandling
 
 import mu.KLogging
 import org.springframework.amqp.core.Exchange

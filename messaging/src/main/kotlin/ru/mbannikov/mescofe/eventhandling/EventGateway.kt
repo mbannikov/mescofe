@@ -6,6 +6,7 @@ import java.util.UUID
 class EventGateway(
     private val eventBus: EventBus
 ) {
+
     /** Публикует событие в шину. */
     fun publish(event: Any) {
         val eventMessage = GenericEventMessage(

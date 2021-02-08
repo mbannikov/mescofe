@@ -4,4 +4,5 @@ spring:
 
 logging:
   level:
+    org.springframework.amqp.rabbit.core.RabbitTemplate: TRACE
     ru.mbannikov.mescofe: DEBUG

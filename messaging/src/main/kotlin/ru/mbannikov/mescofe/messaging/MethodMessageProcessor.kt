@@ -5,8 +5,10 @@ import kotlin.reflect.KClass
 
 class MethodMessageHandler(
     private val target: Any,
-    private val method: Method
+    private val method: Method,
+    messageType: KClass<out Message<*>>
 ) : MessageHandler {
+    override val handleMessageType: KClass<out Message<*>> = messageType
 
     override val handlePayloadType: KClass<*> = run {
         val parameters = method.parameters
@@ -29,5 +31,9 @@ class MethodMessageHandler(
     override fun handle(message: Message<*>): Any? {
         method.trySetAccessible()
         return method.invoke(target, message.payload)
+    }
+
+    override fun toString(): String {
+        return "MethodMessageHandler(target=${target::class.simpleName}, method=${method.name}, handlePayloadType=$handlePayloadType)"
     }
 }
