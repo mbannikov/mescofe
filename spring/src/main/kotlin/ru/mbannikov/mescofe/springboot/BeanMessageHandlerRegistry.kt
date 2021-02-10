@@ -17,11 +17,11 @@ class BeanMessageHandlerRegistry(
         val result = mutableSetOf<ru.mbannikov.mescofe.messaging.MessageHandler>()
 
         beanFactory.beanNamesIterator.forEach { beanName ->
-            val beanType: Class<*>? = beanFactory.getType(beanName)
+            val beanType: Class<*> = beanFactory.getType(beanName) ?: return@forEach
             val containsBeanDefinition: Boolean = beanFactory.containsBeanDefinition(beanName)
-            val isSingleton: Boolean = beanFactory.isSingleton(beanName)
+            val isSingleton: Boolean = containsBeanDefinition && beanFactory.getBeanDefinition(beanName).isSingleton
 
-            if (beanType != null && containsBeanDefinition && isSingleton) {
+            if (containsBeanDefinition && isSingleton) {
                 val classMethods: Iterable<Method> = ReflectionUtils.methodsOf(clazz = beanType)
                 classMethods.forEach { method ->
                     val messageHandler: MessageHandler? = AnnotationUtils.findAnnotation(method, MessageHandler::class.java)
