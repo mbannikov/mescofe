@@ -26,6 +26,8 @@ class MethodMessageHandler(
     override fun canHandleType(payloadType: KClass<*>): Boolean =
         this.handlePayloadType.java.isAssignableFrom(payloadType.java)
 
-    override fun handle(message: Message<*>): Any? =
-        method.invoke(target, message.payload)
+    override fun handle(message: Message<*>): Any? {
+        method.trySetAccessible()
+        return method.invoke(target, message.payload)
+    }
 }

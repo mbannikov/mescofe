@@ -3,7 +3,6 @@ package ru.mbannikov.mescofe.springboot
 import org.springframework.amqp.core.Exchange
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -16,6 +15,9 @@ import ru.mbannikov.mescofe.messaging.MessageHandlerRegistry
 class MessagingAutoConfiguration {
 
     @Bean
+    fun messageHandlerRegistryBeanDefinitionRegistryPostProcessor() = MessageHandlerRegistryBeanDefinitionRegistryPostProcessor()
+
+    @Bean
     @ConditionalOnMissingBean
     fun eventBus(
         @Qualifier("eventBusExchange") exchange: Exchange,
@@ -25,10 +27,6 @@ class MessagingAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun eventGateway(eventBus: EventBus): EventGateway = EventGateway(eventBus)
-
-    @Bean
-    @ConditionalOnMissingBean
-    fun messageHandlerRegistry(beanFactory: ConfigurableListableBeanFactory): MessageHandlerRegistry = BeanMessageHandlerRegistry(beanFactory)
 
     @Bean
     @ConditionalOnMissingBean
