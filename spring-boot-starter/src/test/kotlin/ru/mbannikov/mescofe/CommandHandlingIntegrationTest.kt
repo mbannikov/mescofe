@@ -6,12 +6,17 @@ import org.awaitility.kotlin.await
 import org.awaitility.kotlin.until
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.context.ApplicationListener
 import org.springframework.context.annotation.Import
 import ru.mbannikov.mescofe.TestCommandHandler.Companion.HANDLER_RESULT
 import ru.mbannikov.mescofe.cqrs.CommandGateway
 import ru.mbannikov.mescofe.cqrs.annotation.CommandHandler
+import ru.mbannikov.mescofe.messaging.SimpleMessagePayloadTypeResolver
+import ru.mbannikov.mescofe.springboot.cqrs.Result
 
-@Import(TestCommandHandler::class)
+@Import(TestCommandHandler::class, CommandHandlingIntegrationTest.MessagePayloadTypeRegister::class)
 private class CommandHandlingIntegrationTest @Autowired constructor(
     private val commandGateway: CommandGateway,
     private val commandHandler: TestCommandHandler
@@ -24,11 +29,11 @@ private class CommandHandlingIntegrationTest @Autowired constructor(
         assertHandlerReceivedSameCommand()
     }
 
-//    @Test
+    @Test
     fun `check that the command handler returns proper result`() {
         // TODO: для прохождения теста необходимо, чтобы AmqpCommandBus::handleMessage начал возвращать CommandMessage<*>
-        val commandResult = publishCommandAndWait<String>()
-        assert(commandResult == HANDLER_RESULT)
+        val commandResult = publishCommandAndWait<Result>()
+        assert(commandResult.value == HANDLER_RESULT)
     }
 
     private fun publishCommand() {
@@ -55,6 +60,16 @@ private class CommandHandlingIntegrationTest @Autowired constructor(
         val receivedCommand = commandHandler.receivedCommands.first()
 
         assert(publishedCommand == receivedCommand)
+    }
+
+    class MessagePayloadTypeRegister(
+        @Qualifier("commandPayloadTypeResolver") private val commandPayloadTypeResolver: SimpleMessagePayloadTypeResolver,
+        @Qualifier("commandResultPayloadTypeResolver") private val commandResultPayloadTypeResolver: SimpleMessagePayloadTypeResolver,
+    ) : ApplicationListener<ApplicationReadyEvent> {
+        override fun onApplicationEvent(event: ApplicationReadyEvent) {
+            commandPayloadTypeResolver.registerPayloadType("RegisterUserCommand", RegisterUserCommand::class)
+            commandResultPayloadTypeResolver.registerPayloadType("Result", Result::class)
+        }
     }
 
     companion object {

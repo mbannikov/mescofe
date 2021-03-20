@@ -7,6 +7,8 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import ru.mbannikov.mescofe.cqrs.AbstractCommandBus
 import ru.mbannikov.mescofe.cqrs.CommandMessage
+import ru.mbannikov.mescofe.cqrs.CommandResultMessage
+import ru.mbannikov.mescofe.cqrs.GenericCommandResultMessage
 
 @RabbitListener(queues = ["#{commandBusQueueRegistry.queueNames}"])
 class AmqpCommandBus(
@@ -27,18 +29,36 @@ class AmqpCommandBus(
         logger.debug { "message=$commandMessage" }
 
         val routingKey = commandMessage.type
-        return rabbitTemplate.convertSendAndReceive(exchange.name, routingKey, commandMessage) as? T
+        val resultMessage: CommandResultMessage<*> = rabbitTemplate.convertSendAndReceive(exchange.name, routingKey, commandMessage) as CommandResultMessage<*>
+
+        return resultMessage.payload as? T
             ?: throw Exception("Can't cast command response") // TODO: сделать нормальное исключение
     }
 
     // TODO: возвращать CommandResultMessage для работы sendAndWait
     @RabbitHandler
-    fun handleMessage(commandMessage: CommandMessage<*>) {
+    fun handleMessage(commandMessage: CommandMessage<*>): CommandResultMessage<*> {
         logger.info { "The command bus received a command message=${commandMessage.type}" }
         logger.debug { "message=$commandMessage" }
 
         processMessage(commandMessage)
+
+        // TODO: HARDCODE!!!
+        // TODO: HARDCODE!!!
+        // TODO: HARDCODE!!!
+        // TODO: HARDCODE!!!
+        // TODO: HARDCODE!!!
+        // TODO: HARDCODE!!!
+        return GenericCommandResultMessage(
+            identifier = "id",
+            type = "Result",
+            payload = Result("SomeCommandResult")
+        )
     }
 
     companion object: KLogging()
 }
+
+data class Result(
+    val value: String
+)

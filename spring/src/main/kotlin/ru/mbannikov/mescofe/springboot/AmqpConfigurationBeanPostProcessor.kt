@@ -9,6 +9,7 @@ import org.springframework.beans.factory.BeanFactoryAware
 import org.springframework.beans.factory.config.BeanPostProcessor
 import org.springframework.messaging.converter.MappingJackson2MessageConverter
 import ru.mbannikov.mescofe.cqrs.CommandMessage
+import ru.mbannikov.mescofe.cqrs.CommandResultMessage
 import ru.mbannikov.mescofe.eventhandling.EventMessage
 
 class AmqpConfigurationBeanPostProcessor(
@@ -28,6 +29,7 @@ class AmqpConfigurationBeanPostProcessor(
         val simpleModule: SimpleModule = SimpleModule()
             .addDeserializer(EventMessage::class.java, deserializerFactory.getDeserializer(EventMessage::class))
             .addDeserializer(CommandMessage::class.java, deserializerFactory.getDeserializer(CommandMessage::class))
+            .addDeserializer(CommandResultMessage::class.java, deserializerFactory.getDeserializer(CommandResultMessage::class))
 
         objectMapper
             .registerModule(simpleModule)

@@ -18,6 +18,8 @@ import ru.mbannikov.mescofe.cqrs.CommandBus
 import ru.mbannikov.mescofe.cqrs.CommandGateway
 import ru.mbannikov.mescofe.messaging.MessageDispatcher
 import ru.mbannikov.mescofe.messaging.MessageHandlerRegistry
+import ru.mbannikov.mescofe.messaging.MessagePayloadTypeResolver
+import ru.mbannikov.mescofe.messaging.SimpleMessagePayloadTypeResolver
 import ru.mbannikov.mescofe.springboot.cqrs.AmqpCommandBus
 import ru.mbannikov.mescofe.springboot.cqrs.AmqpCommandQueueAndBindingBeanRegistrar
 import ru.mbannikov.mescofe.springboot.cqrs.CommandBusQueueRegistry
@@ -44,9 +46,24 @@ class AmqpAutoConfiguration {
         }
 
     @Bean
-    fun amqpConfigurationBeanPostProcessor(messageHandlerRegistry: MessageHandlerRegistry): AmqpConfigurationBeanPostProcessor {
-        val deserializer = JacksonMessageDeserializer(messageHandlerRegistry)
-        val deserializerFactory = JacksonMessageDeserializerFactory(deserializer)
+    fun eventPayloadTypeResolver(): MessagePayloadTypeResolver = SimpleMessagePayloadTypeResolver()
+
+    @Bean
+    fun commandPayloadTypeResolver(): MessagePayloadTypeResolver = SimpleMessagePayloadTypeResolver()
+
+    @Bean
+    fun commandResultPayloadTypeResolver(): MessagePayloadTypeResolver = SimpleMessagePayloadTypeResolver()
+
+    @Bean
+    fun amqpConfigurationBeanPostProcessor(
+        @Qualifier("eventPayloadTypeResolver") eventPayloadTypeResolver: MessagePayloadTypeResolver,
+        @Qualifier("commandPayloadTypeResolver") commandPayloadTypeResolver: MessagePayloadTypeResolver,
+        @Qualifier("commandResultPayloadTypeResolver") commandResultPayloadTypeResolver: MessagePayloadTypeResolver
+    ): AmqpConfigurationBeanPostProcessor {
+        val eventMessageDeserializer = JacksonMessageDeserializer(eventPayloadTypeResolver)
+        val commandMessageDeserializer = JacksonMessageDeserializer(commandPayloadTypeResolver)
+        val commandResultMessageDeserializer = JacksonMessageDeserializer(commandResultPayloadTypeResolver)
+        val deserializerFactory = JacksonMessageDeserializerFactory(eventMessageDeserializer, commandMessageDeserializer, commandResultMessageDeserializer)
 
         return AmqpConfigurationBeanPostProcessor(deserializerFactory)
     }

@@ -7,11 +7,15 @@ import org.awaitility.kotlin.await
 import org.awaitility.kotlin.until
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.context.ApplicationListener
 import org.springframework.context.annotation.Import
 import ru.mbannikov.mescofe.eventhandling.EventGateway
 import ru.mbannikov.mescofe.eventhandling.annotation.EventHandler
+import ru.mbannikov.mescofe.messaging.SimpleMessagePayloadTypeResolver
 
-@Import(TestEventHandler::class)
+@Import(TestEventHandler::class, EventHandlingIntegrationTest.MessagePayloadTypeRegister::class)
 private class EventHandlingIntegrationTest @Autowired constructor(
     private val eventGateway: EventGateway,
     private val eventHandler: TestEventHandler
@@ -40,6 +44,15 @@ private class EventHandlingIntegrationTest @Autowired constructor(
         val receivedEvents = eventHandler.receivedEvents
 
         assert(publishedEvents == receivedEvents)
+    }
+
+    class MessagePayloadTypeRegister(
+        @Qualifier("eventPayloadTypeResolver") private val eventPayloadTypeResolver: SimpleMessagePayloadTypeResolver,
+    ) : ApplicationListener<ApplicationReadyEvent> {
+        override fun onApplicationEvent(event: ApplicationReadyEvent) {
+            eventPayloadTypeResolver.registerPayloadType("UserRegisteredEvent", UserRegisteredEvent::class)
+            eventPayloadTypeResolver.registerPayloadType("UserChangedEvent", UserChangedEvent::class)
+        }
     }
 
     companion object {

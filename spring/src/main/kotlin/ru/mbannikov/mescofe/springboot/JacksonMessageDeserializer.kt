@@ -5,13 +5,11 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.TextNode
 import com.fasterxml.jackson.module.kotlin.treeToValue
-import ru.mbannikov.mescofe.eventhandling.EventMessage
 import ru.mbannikov.mescofe.messaging.Message
-import ru.mbannikov.mescofe.messaging.MessageHandlerRegistry
-import kotlin.reflect.KClass
+import ru.mbannikov.mescofe.messaging.MessagePayloadTypeResolver
 
 class JacksonMessageDeserializer(
-    private val messageHandlerRegistry: MessageHandlerRegistry
+    private val payloadTypeResolver: MessagePayloadTypeResolver
 ) {
     fun deserialize(parser: JsonParser): MessageDeserializerContainer {
         val objectMapper = parser.codec as ObjectMapper
@@ -27,21 +25,13 @@ class JacksonMessageDeserializer(
     }
 
     private fun getPayloadClassByType(payloadType: String): Class<*> {
-        val suitableClassesForPayload: List<KClass<*>> = messageHandlerRegistry.handlers
-            .map { it.handlePayloadType }
-            .filter { clazz -> clazz.simpleName == payloadType }
-
-        if (suitableClassesForPayload.isEmpty())
-            throw Exception() // TODO
-        if (suitableClassesForPayload.size > 1)
-            throw Exception() // TODO
-
-        return suitableClassesForPayload.first().java
+        val payloadClass = payloadTypeResolver.resolvePayloadType(payloadType)?.java
+        return payloadClass ?: throw Exception() // TODO: исправить исключение на подходящее
     }
 
     data class MessageDeserializerContainer(
         override val identifier: String,
         override val type: String,
         override val payload: Any
-    ) : EventMessage<Any>
+    ) : Message<Any>
 }
