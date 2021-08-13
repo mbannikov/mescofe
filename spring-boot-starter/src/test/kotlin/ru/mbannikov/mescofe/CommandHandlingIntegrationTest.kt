@@ -14,7 +14,6 @@ import ru.mbannikov.mescofe.TestCommandHandler.Companion.HANDLER_RESULT
 import ru.mbannikov.mescofe.cqrs.CommandGateway
 import ru.mbannikov.mescofe.cqrs.annotation.CommandHandler
 import ru.mbannikov.mescofe.messaging.SimpleMessagePayloadTypeResolver
-import ru.mbannikov.mescofe.springboot.cqrs.Result
 
 @Import(TestCommandHandler::class, CommandHandlingIntegrationTest.MessagePayloadTypeRegister::class)
 private class CommandHandlingIntegrationTest @Autowired constructor(
@@ -32,8 +31,8 @@ private class CommandHandlingIntegrationTest @Autowired constructor(
     @Test
     fun `check that the command handler returns proper result`() {
         // TODO: для прохождения теста необходимо, чтобы AmqpCommandBus::handleMessage начал возвращать CommandMessage<*>
-        val commandResult = publishCommandAndWait<Result>()
-        assert(commandResult.value == HANDLER_RESULT)
+        val commandResult = publishCommandAndWait<RegisterUserCommandResult>()
+        assert(commandResult == HANDLER_RESULT)
     }
 
     private fun publishCommand() {
@@ -68,7 +67,7 @@ private class CommandHandlingIntegrationTest @Autowired constructor(
     ) : ApplicationListener<ApplicationReadyEvent> {
         override fun onApplicationEvent(event: ApplicationReadyEvent) {
             commandPayloadTypeResolver.registerPayloadType("RegisterUserCommand", RegisterUserCommand::class)
-            commandResultPayloadTypeResolver.registerPayloadType("Result", Result::class)
+            commandResultPayloadTypeResolver.registerPayloadType("RegisterUserCommandResult", RegisterUserCommandResult::class)
         }
     }
 
@@ -82,14 +81,14 @@ private class TestCommandHandler {
     val receivedCommands: MutableSet<Any> = mutableSetOf()
 
     @CommandHandler
-    private fun handleRegisterUserCommand(command: RegisterUserCommand): String {
+    private fun handleRegisterUserCommand(command: RegisterUserCommand): RegisterUserCommandResult {
         logger.debug { "The command handler received an command message=$command" }
         receivedCommands.add(command)
         return HANDLER_RESULT
     }
 
     companion object {
-        const val HANDLER_RESULT: String = "SomeCommandResult"
+        val HANDLER_RESULT = RegisterUserCommandResult(userId = "SomeUserId")
         private val logger: KLogger = logger {}
     }
 }
@@ -97,4 +96,8 @@ private class TestCommandHandler {
 private data class RegisterUserCommand(
     val username: String,
     val email: String
+)
+
+private data class RegisterUserCommandResult(
+    val userId: String,
 )

@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import ru.mbannikov.mescofe.eventhandling.EventBus
 import ru.mbannikov.mescofe.eventhandling.EventGateway
-import ru.mbannikov.mescofe.messaging.MessageDispatcher
+import ru.mbannikov.mescofe.eventhandling.EventMessageDispatcher
 import ru.mbannikov.mescofe.messaging.MessageHandlerRegistry
 import ru.mbannikov.mescofe.springboot.eventhandling.AmqpEventBus
 
@@ -27,7 +27,7 @@ class MessagingAutoConfiguration {
     fun eventGateway(eventBus: EventBus): EventGateway = EventGateway(eventBus)
 
     @Bean
-    fun eventDispatcher(eventBus: EventBus, handlerRegistry: MessageHandlerRegistry) = MessageDispatcher(eventBus, handlerRegistry)
+    fun eventDispatcher(eventBus: EventBus, handlerRegistry: MessageHandlerRegistry) = EventMessageDispatcher(eventBus, handlerRegistry)
 
     companion object {
         @Bean

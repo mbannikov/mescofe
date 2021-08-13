@@ -9,6 +9,7 @@ import ru.mbannikov.mescofe.cqrs.AbstractCommandBus
 import ru.mbannikov.mescofe.cqrs.CommandMessage
 import ru.mbannikov.mescofe.cqrs.CommandResultMessage
 import ru.mbannikov.mescofe.cqrs.GenericCommandResultMessage
+import java.util.UUID
 
 @RabbitListener(queues = ["#{commandBusQueueRegistry.queueNames}"])
 class AmqpCommandBus(
@@ -32,33 +33,22 @@ class AmqpCommandBus(
         val resultMessage: CommandResultMessage<*> = rabbitTemplate.convertSendAndReceive(exchange.name, routingKey, commandMessage) as CommandResultMessage<*>
 
         return resultMessage.payload as? T
-            ?: throw Exception("Can't cast command response") // TODO: сделать нормальное исключение
+            ?: throw Exception("Can't cast command result") // TODO: сделать нормальное исключение
     }
 
-    // TODO: возвращать CommandResultMessage для работы sendAndWait
     @RabbitHandler
-    fun handleMessage(commandMessage: CommandMessage<*>): CommandResultMessage<*> {
+    fun handleMessage(commandMessage: CommandMessage<*>): CommandResultMessage<*>? {
         logger.info { "The command bus received a command message=${commandMessage.type}" }
         logger.debug { "message=$commandMessage" }
 
-        processMessage(commandMessage)
-
-        // TODO: HARDCODE!!!
-        // TODO: HARDCODE!!!
-        // TODO: HARDCODE!!!
-        // TODO: HARDCODE!!!
-        // TODO: HARDCODE!!!
-        // TODO: HARDCODE!!!
-        return GenericCommandResultMessage(
-            identifier = "id",
-            type = "Result",
-            payload = Result("SomeCommandResult")
-        )
+        return processMessage(commandMessage)?.let { commandResult ->
+            GenericCommandResultMessage(
+                identifier = UUID.randomUUID().toString(),
+                type = commandResult::class.simpleName!!, // TODO: сначала брать из аннотации @CommandResultType, а если ее нет, то имя класса
+                payload = commandResult
+            )
+        }
     }
 
     companion object: KLogging()
 }
-
-data class Result(
-    val value: String
-)

@@ -16,7 +16,7 @@ import org.springframework.context.annotation.DependsOn
 import org.springframework.messaging.converter.MappingJackson2MessageConverter
 import ru.mbannikov.mescofe.cqrs.CommandBus
 import ru.mbannikov.mescofe.cqrs.CommandGateway
-import ru.mbannikov.mescofe.messaging.MessageDispatcher
+import ru.mbannikov.mescofe.cqrs.CommandMessageDispatcher
 import ru.mbannikov.mescofe.messaging.MessageHandlerRegistry
 import ru.mbannikov.mescofe.messaging.MessagePayloadTypeResolver
 import ru.mbannikov.mescofe.messaging.SimpleMessagePayloadTypeResolver
@@ -107,7 +107,7 @@ class AmqpAutoConfiguration {
 
     @Bean
     fun commandDispatcher(commandBus: CommandBus, handlerRegistry: MessageHandlerRegistry) =
-        MessageDispatcher(commandBus, handlerRegistry)
+        CommandMessageDispatcher(commandBus, handlerRegistry)
 
     @Bean
     fun commandQueueAndBindingRegistrar(

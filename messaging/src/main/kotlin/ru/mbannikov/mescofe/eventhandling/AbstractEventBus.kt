@@ -14,4 +14,4 @@ abstract class AbstractEventBus : EventBus {
     }
 }
 
-private typealias MessageProcessor = (EventMessage<*>) -> Unit
+private typealias MessageProcessor = (EventMessage<*>) -> Any?

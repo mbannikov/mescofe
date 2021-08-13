@@ -20,7 +20,8 @@ subprojects {
     version = "1.0.0"
 
     apply<KotlinPlatformJvmPlugin>()
-    apply(plugin = "maven-publish")
+    apply(plugin = "org.gradle.maven")
+//    apply(plugin = "maven-publish")
 
     dependencies {
         api(kotlin("stdlib-jdk8", kotlinVersion))
@@ -37,22 +38,22 @@ subprojects {
         }
     }
 
-    publishing {
-        publications {
-            create<MavenPublication>("myLibrary") {
-                from(components["java"])
-            }
-        }
-
-        repositories {
-            maven {
-                name = "mescofe"
-                url = URI("https://maven.pkg.github.com/mbannikov/mescofe")
-                credentials {
-                    username = System.getenv("MAVEN_REGISTRY_USERNAME")
-                    password = System.getenv("MAVEN_REGISTRY_PASSWORD")
-                }
-            }
-        }
-    }
+//    publishing {
+//        publications {
+//            create<MavenPublication>("myLibrary") {
+//                from(components["java"])
+//            }
+//        }
+//
+//        repositories {
+//            maven {
+//                name = "mescofe"
+//                url = URI("https://maven.pkg.github.com/mbannikov/mescofe")
+//                credentials {
+//                    username = System.getenv("MAVEN_REGISTRY_USERNAME")
+//                    password = System.getenv("MAVEN_REGISTRY_PASSWORD")
+//                }
+//            }
+//        }
+//    }
 }

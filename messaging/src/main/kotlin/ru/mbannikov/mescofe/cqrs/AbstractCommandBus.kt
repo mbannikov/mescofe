@@ -1,17 +1,15 @@
 package ru.mbannikov.mescofe.cqrs
 
 abstract class AbstractCommandBus : CommandBus {
-    private val messageProcessors: MutableList<MessageProcessor> = mutableListOf()
+    private var messageProcessor: MessageProcessor? = null
 
     override fun subscribe(messageProcessor: MessageProcessor) {
-        messageProcessors.add(messageProcessor)
+        require(this.messageProcessor == null) { "The CommandBus can have only one subscriber" }
+
+        this.messageProcessor = messageProcessor
     }
 
-    protected fun processMessage(eventMessage: CommandMessage<*>) {
-        messageProcessors.forEach { processor ->
-            processor(eventMessage)
-        }
-    }
+    protected fun processMessage(commandMessage: CommandMessage<*>): Any? = messageProcessor?.invoke(commandMessage)
 }
 
-private typealias MessageProcessor = (CommandMessage<*>) -> Unit
+private typealias MessageProcessor = (CommandMessage<*>) -> Any?
